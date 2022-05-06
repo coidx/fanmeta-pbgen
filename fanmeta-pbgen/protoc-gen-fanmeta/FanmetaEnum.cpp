@@ -31,7 +31,7 @@ void FanmetaEnum::Write(google::protobuf::io::Printer& printer)
 	for (int i = 0; i < impl_->enum_descriptor->value_count(); ++i)
 	{
 		auto val = impl_->enum_descriptor->value(i);
-		printer.Print("\tpublic static readonly string $p$ = ", "p", val->name());
+		printer.Print("\tpublic const string $p$ = ", "p", val->name());
 		printer.Print("\"$p$\";\n", "p", val->name());
 	}
 	printer.Print("}\n");
