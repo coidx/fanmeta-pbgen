@@ -27,7 +27,7 @@ FanmetaEnum::~FanmetaEnum()
 
 void FanmetaEnum::Write(google::protobuf::io::Printer& printer)
 {
-	printer.Print("[CSLStub.Out(\"Network\")]\npublic static class $p$ {\n", "p", impl_->enum_descriptor->name());
+	printer.Print("public static class $p$ {\n", "p", impl_->enum_descriptor->name());
 	for (int i = 0; i < impl_->enum_descriptor->value_count(); ++i)
 	{
 		auto val = impl_->enum_descriptor->value(i);

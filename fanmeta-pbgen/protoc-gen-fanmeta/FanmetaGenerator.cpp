@@ -61,7 +61,6 @@ namespace google {
 				// Enum
 				{
 					std::unique_ptr<io::ZeroCopyOutputStream> output(context->Open(file->name() + ".enum.pb.cs"));
-					GeneratedCodeInfo annotations;
 					io::Printer printer(output.get(), '$', nullptr);
 
 					for (int i = 0; i < file->enum_type_count(); i++)
@@ -79,13 +78,12 @@ namespace google {
 				// Message
 				{
 					std::unique_ptr<io::ZeroCopyOutputStream> output(context->Open(GetOutputFileName(file)));
-					GeneratedCodeInfo annotations;
 					io::Printer printer(output.get(), '$', nullptr);
 
 					for (int i = 0; i < file->message_type_count(); i++)
 					{
 						const Descriptor* message_desc = file->message_type(i);
-						FanmetaMessage message(message_desc);
+						FanmetaMessage message(message_desc, file->package());
 						message.Write(printer);
 					}
 
@@ -94,6 +92,30 @@ namespace google {
 						return false;
 					}
 				}
+
+				// Rpc
+				//{
+				//	std::unique_ptr<io::ZeroCopyOutputStream> output(context->Open(file->name() + ".service.pb.cs"));
+				//	io::Printer printer(output.get(), '$', nullptr);
+				//	std::map<std::string, std::string> vars;
+
+				//	for (int i = 0; i < file->service_count(); ++i)
+				//	{
+				//		auto service = file->service(i);
+				//		
+				//		printer.Print("\npublic static class RpcService {\n");
+				//		for (int j = 0; j < service->method_count(); ++j)
+				//		{
+				//			auto method = service->method(i);
+				//			vars.clear();
+				//			vars.insert(std::make_pair("method_name", method->name()));
+				//			vars.insert(std::make_pair("input_type", method->input_type()->name()));
+				//			vars.insert(std::make_pair("output_type", method->output_type()->name()));
+				//			printer.Print(vars, "\tpublic Promise $method_name$($input_type$ req) {\n\t}\n");
+				//		}
+				//		printer.Print("}\n");
+				//	}
+				//}
 				return true;
 			}
 

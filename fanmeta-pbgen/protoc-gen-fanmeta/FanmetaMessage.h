@@ -6,7 +6,7 @@
 class FanmetaMessage
 {
 public:
-	FanmetaMessage(const google::protobuf::Descriptor* descriptor);
+	FanmetaMessage(const google::protobuf::Descriptor* descriptor, const std::string& package);
 	~FanmetaMessage();
 
 public:

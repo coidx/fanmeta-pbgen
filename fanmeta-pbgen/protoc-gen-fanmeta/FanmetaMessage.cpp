@@ -2,6 +2,7 @@
 
 #include <google/protobuf/io/printer.h>
 #include <string>
+#include <map>
 
 using std::string;
 using namespace google::protobuf;
@@ -11,6 +12,7 @@ class FanmetaMessageImpl
 {
 public:
 	const Descriptor* message_desc;
+	string package;
 
 public:
 	static string GenRepeatedField(string& content);
@@ -132,10 +134,11 @@ void FanmetaMessageImpl::WriteField(io::Printer& printer)
 }
 
 
-FanmetaMessage::FanmetaMessage(const Descriptor* descriptor)
+FanmetaMessage::FanmetaMessage(const Descriptor* descriptor, const std::string& package)
 {
 	impl_ = new FanmetaMessageImpl;
 	impl_->message_desc = descriptor;
+	impl_->package = package;
 }
 
 FanmetaMessage::~FanmetaMessage()
@@ -149,8 +152,47 @@ FanmetaMessage::~FanmetaMessage()
 
 void FanmetaMessage::Write(io::Printer& printer)
 {
-	printer.Print("public class $p$ {\n", "p", impl_->message_desc->name());
+	auto class_name = impl_->message_desc->name();
+	printer.Print("public class $p$ {\n", "p", class_name);
 	impl_->WriteField(printer);
+
+	// 构造函数
+	printer.Print("\tprivate $p$() {}\n", "p", class_name);
+
+	auto type_path = impl_->package + "." + class_name;
+
+	std::map<string, string> vars;
+	vars.insert(std::make_pair("class_name", class_name));
+	vars.insert(std::make_pair("type_path", type_path));
+
+	// 序列化/反序列化
+	{
+		auto attr = "\t[CSLStub.ReplaceScript(\"CSLTypes.ProtobufUtils.Encode({1}, {0})\")]\n";
+		printer.WriteRaw(attr, strlen(attr));
+		printer.Print(vars, "\tpublic extern byte[] Encode(string package = \"$type_path$\");\n");
+	}
+	{
+		auto attr = "\t[CSLStub.ReplaceScript(\"{{}}\")]\n";
+		printer.WriteRaw(attr, strlen(attr));
+		printer.Print(vars, "\tpublic extern $class_name$ AsLuaTable();\n");
+	}
+	{
+		auto attr = "\t[CSLStub.ReplaceScript(\"CSLTypes.ProtobufUtils.Decode({1}, {0})\")]\n";
+		printer.WriteRaw(attr, strlen(attr));
+		printer.Print(vars, "\tpublic static extern $class_name$ Decode(object obj, string package = \"$type_path$\");\n");
+	}
+	{
+		auto attr = "\t[CSLStub.ReplaceScript(\"{{}}\")]\n";
+		printer.WriteRaw(attr, strlen(attr));
+		printer.Print(vars, "\tpublic static extern $class_name$ Create();\n");
+	}
+	{
+
+		auto attr = "\t[CSLStub.ReplaceScript(\"{0}\")]\n";
+		printer.WriteRaw(attr, strlen(attr));
+		printer.Print(vars, "\tpublic static extern $class_name$ As(object obj);\n");
+	}
+
 	printer.Print("}\n");
 
 }
