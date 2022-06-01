@@ -165,6 +165,9 @@ void FanmetaMessage::Write(io::Printer& printer)
 	vars.insert(std::make_pair("class_name", class_name));
 	vars.insert(std::make_pair("type_path", type_path));
 
+	// 类型完整路径
+	printer.Print(vars, "\tpublic const string FullName = \"$type_path$\";\n");
+
 	// 序列化/反序列化
 	{
 		auto attr = "\t[CSLStub.ReplaceScript(\"CSLTypes.ProtobufUtils.Encode({1}, {0})\")]\n";
